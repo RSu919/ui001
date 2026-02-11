@@ -1,13 +1,13 @@
 // --- 1. 初始化與設定 ---
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const supabaseUrl = 'https://gceaxslljccatxvvohtx.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjZWF4c2xsamNjYXR4dnZvaHR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3OTI1ODAsImV4cCI6MjA4NjM2ODU4MH0.QJvdg8gYt_zX8HN7rfylt2UrgNhJ8HeldygRkaVhEX8';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 let state = {
     userId: localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9),
     group: localStorage.getItem('group') || (Math.random() > 0.5 ? 'One-way' : 'Two-way'),
     currentTrial: parseInt(localStorage.getItem('currentTrial')) || 0,
-    trials: [], // 存放隨機後的 60 題
+    trials: [], 
     startTime: null,
     clickCount: 0
 };
@@ -16,36 +16,40 @@ let state = {
 localStorage.setItem('userId', state.userId);
 localStorage.setItem('group', state.group);
 
-// --- 2. 實驗演算法：題目抽取與錯誤指派 ---
+// --- 2. 實驗演算法：使用匯入的 60 題數據 ---
 function generateTrials() {
-    // 假設我們有 100 題庫，從中抽 60 題
-    let pool = Array.from({length: 100}, (_, i) => ({ id: i, is_ai: i < 50 })); // 50真50AI
-    let selected = pool.sort(() => 0.5 - Math.random()).slice(0, 60);
-
-    // 定義各階段錯誤題數 (5%, 10%, 15% 約略值)
-    const stageErrors = [1, 2, 3]; 
+    // 從 stimuli.js 中獲取 STIMULI_POOL
+    // 雖然題目有預設 Stage，但在客戶端我們會根據受試者進度打亂順序，
+    // 同時確保每個 Stage (每 20 題) 的錯誤題量符合實驗設計。
     
-    selected.forEach((trial, index) => {
-        const stage = Math.floor(index / 20);
-        trial.stage = stage + 1;
-        trial.should_fail = false; // 預設 AI 給出正確建議
-        
-        // 標記該階段哪些序號要出錯 (例如每階段前幾個隨機抽)
-        // 這裡僅示範邏輯：在每個階段的前 20 題中隨機挑選 N 題設為 should_fail
-    });
+    let allTrials = [...STIMULI_POOL];
+    
+    // 將題目依照原始 Stage 分成三組，並在組內打亂順序以消除順序效應
+    let stage1 = allTrials.filter(t => t.stage === 1).sort(() => 0.5 - Math.random());
+    let stage2 = allTrials.filter(t => t.stage === 2).sort(() => 0.5 - Math.random());
+    let stage3 = allTrials.filter(t => t.stage === 3).sort(() => 0.5 - Math.random());
 
-    return selected;
+    return [...stage1, ...stage2, ...stage3];
 }
 
 // --- 3. UI 渲染邏輯 ---
 function loadTrial() {
     if (state.currentTrial >= 60) {
-        alert("實驗結束，感謝參與！");
+        document.getElementById('experiment-container').innerHTML = `
+            <div class="text-center py-10">
+                <h2 class="text-2xl font-bold text-green-600">實驗已完成</h2>
+                <p class="mt-4 text-gray-600">感謝您的參與，數據已安全上傳。</p>
+            </div>
+        `;
         return;
     }
 
     const trial = state.trials[state.currentTrial];
-    document.getElementById('stimulus-content').innerText = `題目內容示例 #${trial.id}：這是一段用於測試的文本...`;
+    
+    // 注入題目文本 
+    document.getElementById('stimulus-content').innerText = trial.content;
+    
+    // 重置 UI 狀態
     document.getElementById('ai-suggestion-box').classList.add('hidden');
     document.getElementById('action-buttons').classList.add('hidden');
     document.getElementById('custom-options').classList.add('hidden');
@@ -53,39 +57,40 @@ function loadTrial() {
     // 更新進度條
     const progress = (state.currentTrial / 60) * 100;
     document.getElementById('progress-bar').style.width = `${progress}%`;
-    document.getElementById('progress-text').innerText = `進度: ${state.currentTrial} / 60`;
+    document.getElementById('progress-text').innerText = `進度: ${state.currentTrial + 1} / 60`;
 
-    // 1.2s 後顯示 AI 建議
+    // 1.2 秒 Loading 動畫效果
+    const box = document.getElementById('ai-suggestion-box');
+    box.classList.remove('hidden');
+    box.classList.add('animate-pulse');
+    box.innerHTML = `<p class="text-sm text-gray-500">系統偵測中...</p>`;
+
+    // 1.2s 後顯示真正的 AI 建議
     setTimeout(showAISuggestion, 1200);
 }
 
 function showAISuggestion() {
     const trial = state.trials[state.currentTrial];
     const box = document.getElementById('ai-suggestion-box');
+    
+    // 信心度在 88% - 96% 間隨機跳動
     const confidence = Math.floor(Math.random() * (96 - 88 + 1) + 88);
     
-    // 判斷 AI 建議內容 (核心實驗變數)
-    let aiLabel = trial.is_ai ? 'AI 生成' : '真人撰寫';
+    // 根據受試者組別選取對應的預設 AI 標籤 
+    let aiLabelRaw = (state.group === 'One-way') ? trial.ai_label_oneway : trial.ai_label_twoway;
     
-    // 如果這題被指派為「錯誤」，則反轉標籤
-    if (trial.should_fail) {
-        if (state.group === 'One-way' && trial.is_ai) {
-            aiLabel = '真人撰寫'; // 漏判 AI
-        } else if (state.group === 'Two-way') {
-            aiLabel = trial.is_ai ? '真人撰寫' : 'AI 生成'; // 雙向出錯
-        }
-    }
-
-    const colorClass = aiLabel === 'AI 生成' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+    // 轉換為顯示文字
+    const labelDisplay = (aiLabelRaw === 'AI') ? 'AI 生成' : '真人撰寫';
+    const colorClass = (aiLabelRaw === 'AI') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
     
+    box.classList.remove('animate-pulse');
     box.innerHTML = `
-        <div class="inline-flex items-center ${colorClass} px-4 py-2 rounded-full font-bold">
-            <span class="mr-2">🛡️ 系統建議：[${aiLabel}]</span>
+        <div class="inline-flex items-center ${colorClass} px-4 py-2 rounded-full font-bold shadow-sm">
+            <span class="mr-2">🛡️ 系統建議：[${labelDisplay}]</span>
         </div>
-        <p class="mt-2 text-xs text-gray-400">信心度：${confidence}%</p>
+        <p class="mt-2 text-xs text-gray-400">系統信心度：${confidence}%</p>
     `;
     
-    box.classList.remove('hidden', 'animate-pulse');
     document.getElementById('action-buttons').classList.remove('hidden');
     state.startTime = Date.now();
     state.clickCount = 0;
@@ -96,37 +101,64 @@ async function recordResponse(agreedWithAI, customLabel = null) {
     const endTime = Date.now();
     const trial = state.trials[state.currentTrial];
     
+    // 判斷使用者最終標籤內容
+    let userFinalChoice = agreedWithAI 
+        ? ((state.group === 'One-way') ? trial.ai_label_oneway : trial.ai_label_twoway)
+        : (customLabel === 'ai' ? 'AI' : 'Human');
+
     const data = {
         user_id: state.userId,
         group: state.group,
         stage: trial.stage,
         trial_number: state.currentTrial + 1,
         stimulus_id: trial.id,
-        is_ai_generated: trial.is_ai,
-        user_choice: agreedWithAI ? 'agree' : customLabel,
+        is_ai_generated: trial.actual === 'AI',
+        ai_suggestion: (state.group === 'One-way') ? trial.ai_label_oneway : trial.ai_label_twoway,
+        user_choice: userFinalChoice,
+        is_correct: userFinalChoice === trial.actual,
         response_time: endTime - state.startTime,
         click_count: state.clickCount
     };
 
     // 寫入 Supabase
     const { error } = await supabase.from('experiment_results').insert([data]);
-    
     if (error) console.error('Error saving:', error);
 
-    // 進入下一題或問卷
+    // 增加猶豫度記錄邏輯（此處範例為點擊自訂按鈕也算一次）
     state.currentTrial++;
     localStorage.setItem('currentTrial', state.currentTrial);
 
-    if (state.currentTrial % 20 === 0) {
+    // 每 20 題顯示問卷層
+    if (state.currentTrial > 0 && state.currentTrial % 20 === 0) {
         document.getElementById('survey-layer').classList.remove('hidden');
     } else {
         loadTrial();
     }
 }
 
-// --- 初始化執行   ---
+// 顯示自訂選項並增加點擊計數
+function showCustomOptions() {
+    state.clickCount++;
+    document.getElementById('custom-options').classList.remove('hidden');
+}
+
+// 處理問卷送出
+document.getElementById('survey-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const trustScore = formData.get('trust_score');
+
+    // 更新最後一筆數據的問卷內容（或另外存一張表，此處簡化為更新 localStorage 狀態）
+    // 正式環境建議將 survey 分開儲存
+    
+    document.getElementById('survey-layer').classList.add('hidden');
+    e.target.reset();
+    loadTrial();
+};
+
+// --- 初始化執行 ---
 window.onload = () => {
-    state.trials = generateTrials(); // 實際應從後端獲取或固定 Seed
-    document.getElementById('group-display').innerText = `分組：${state.group}`;
+    state.trials = generateTrials();
+    document.getElementById('group-display').innerText = `受試組別：${state.group}`;
     loadTrial();
 };
