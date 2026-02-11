@@ -124,7 +124,7 @@ async function recordResponse(agreedWithAI, customLabel = null) {
     }
 }
 
-// --- 初始化執行 ---
+// --- 初始化執行  ---
 window.onload = () => {
     state.trials = generateTrials(); // 實際應從後端獲取或固定 Seed
     document.getElementById('group-display').innerText = `分組：${state.group}`;
