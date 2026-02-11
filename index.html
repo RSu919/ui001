@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 偵測信任度實驗平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center py-10">
+
+    <div class="w-full max-w-2xl px-4 mb-8">
+        <div class="flex justify-between text-sm mb-1 text-gray-600">
+            <span id="group-display">分組載入中...</span>
+            <span id="progress-text">進度: 0 / 60</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <main id="experiment-container" class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-md">
+        <div id="stimulus-content" class="text-lg leading-relaxed mb-8 min-h-[150px]">
+            正在初始化實驗...
+        </div>
+
+        <hr class="my-6">
+
+        <div id="ai-suggestion-box" class="hidden animate-pulse bg-gray-100 p-6 rounded-lg text-center">
+            <p class="text-sm text-gray-500 mb-2">系統偵測中...</p>
+        </div>
+
+        <div id="action-buttons" class="hidden mt-8 grid grid-cols-2 gap-4">
+            <button onclick="recordResponse(true)" class="py-3 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">同意 AI 建議</button>
+            <button onclick="showCustomOptions()" class="py-3 px-6 border border-gray-300 rounded-lg hover:bg-gray-50">推翻並自訂</button>
+        </div>
+
+        <div id="custom-options" class="hidden mt-4 flex gap-2 justify-center">
+            <button onclick="recordResponse(false, 'human')" class="text-xs py-2 px-4 bg-green-100 text-green-700 rounded border border-green-200">實際應為: 真人撰寫</button>
+            <button onclick="recordResponse(false, 'ai')" class="text-xs py-2 px-4 bg-red-100 text-red-700 rounded border border-red-200">實際應為: AI 生成</button>
+        </div>
+    </main>
+
+    <div id="survey-layer" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl">
+            <h2 class="text-xl font-bold mb-4">階段評估問卷</h2>
+            <form id="survey-form" class="space-y-4">
+                <p class="text-sm text-gray-600">請評估您剛才對 AI 建議的信任程度 (1-7):</p>
+                <input type="range" min="1" max="7" class="w-full" name="trust_score">
+                <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded">送出並繼續</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
