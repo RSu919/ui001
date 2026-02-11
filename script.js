@@ -143,7 +143,7 @@ document.getElementById('survey-form').onsubmit = (e) => {
 window.onload = () => {
     state.trials = generateTrials();
     if (state.trials.length > 0) {
-        document.getElementById('group-display').innerText = `受試組別：${state.group}`;
+        document.getElementById('group-display').innerText = `受試代號：${state.group}`;
         loadTrial();
     }
 };
