@@ -1,59 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 偵測信任度實驗平台</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 偵測信任度實驗平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center py-10">
 
-    <div class="w-full max-w-2xl px-4 mb-8">
-        <div class="flex justify-between text-sm mb-1 text-gray-600">
-            <span id="group-display">分實驗編號：載入中...</span>
-            <span id="progress-text">進度: 0 / 60</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5">
-            <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
-        </div>
+  <!-- 進度列 -->
+  <div class="w-full max-w-2xl px-4 mb-8">
+    <div class="flex justify-between text-sm mb-1 text-gray-600">
+      <span id="group-display">受試代號：載入中...</span>
+      <span id="progress-text">進度：0 / 54</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-2.5">
+      <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- 主要實驗區塊 -->
+  <main id="experiment-container" class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-md">
+
+    <!-- 評論內容 -->
+    <div id="stimulus-content" class="text-lg leading-relaxed mb-8 min-h-[150px] text-gray-800">
+      正在初始化實驗...
     </div>
 
-    <main id="experiment-container" class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-md">
-        <div id="stimulus-content" class="text-lg leading-relaxed mb-8 min-h-[150px]">
-            正在初始化實驗...
-        </div>
+    <hr class="my-6">
 
-        <hr class="my-6">
-
-        <div id="ai-suggestion-box" class="hidden animate-pulse bg-gray-100 p-6 rounded-lg text-center">
-            <p class="text-sm text-gray-500 mb-2">系統偵測中...</p>
-        </div>
-
-        <div id="action-buttons" class="hidden mt-8 grid grid-cols-2 gap-4">
-            <button onclick="recordResponse(true)" class="py-3 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">採納助理建議</button>
-            <button onclick="showCustomOptions()" class="py-3 px-6 border border-gray-300 rounded-lg hover:bg-gray-50">我想自行判斷</button>
-        </div>
-
-        <div id="custom-options" class="hidden mt-4 flex gap-2 justify-center">
-            <button onclick="recordResponse(false, 'human')" class="text-xs py-2 px-4 bg-green-100 text-green-700 rounded border border-green-200">實際應為: 真人撰寫</button>
-            <button onclick="recordResponse(false, 'ai')" class="text-xs py-2 px-4 bg-red-100 text-red-700 rounded border border-red-200">實際應為: AI 生成</button>
-        </div>
-    </main>
-
-    <div id="survey-layer" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl">
-            <h2 class="text-xl font-bold mb-4">階段評估問卷</h2>
-            <form id="survey-form" class="space-y-4">
-                <p class="text-sm text-gray-600">請評估您剛才對 AI 建議的信任程度 (1-7):</p>
-                <input type="range" min="1" max="7" class="w-full" name="trust_score">
-                <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded">送出並繼續</button>
-            </form>
-        </div>
+    <!-- AI 建議標籤 -->
+    <div id="ai-suggestion-box" class="hidden bg-gray-50 p-6 rounded-lg text-center">
+      <p class="text-sm text-gray-400 mb-2">系統偵測中...</p>
     </div>
-         
-    <script src="stimuli.js"></script>
-    <script src="script.js"></script>
+
+    <!-- 操作按鈕 -->
+    <div id="action-buttons" class="hidden mt-8 grid grid-cols-2 gap-4">
+      <button onclick="recordResponse(true)"
+        class="py-3 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+        採納助理建議
+      </button>
+      <button onclick="showCustomOptions()"
+        class="py-3 px-6 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        我想自行判斷
+      </button>
+    </div>
+
+    <!-- 自行判斷選項 -->
+    <div id="custom-options" class="hidden mt-4 flex gap-3 justify-center">
+      <button onclick="recordResponse(false, 'human')"
+        class="text-sm py-2 px-5 bg-green-100 text-green-700 rounded-lg border border-green-200 hover:bg-green-200 transition">
+        ✅ 我認為是：真人撰寫
+      </button>
+      <button onclick="recordResponse(false, 'ai')"
+        class="text-sm py-2 px-5 bg-red-100 text-red-700 rounded-lg border border-red-200 hover:bg-red-200 transition">
+        🤖 我認為是：AI 生成
+      </button>
+    </div>
+
+  </main>
+
+  <!-- 信任量表浮層（四題，逐題呈現） -->
+  <div id="survey-layer" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+    <div class="bg-white p-8 rounded-2xl max-w-lg w-full shadow-2xl">
+
+      <h2 class="text-xl font-bold mb-1 text-gray-800">階段結束，請完成簡短問卷</h2>
+      <p class="text-sm text-gray-500 mb-6">請根據您剛才的用餐體驗，評估對 AI 建議系統的看法。</p>
+
+      <!-- 問卷題目動態渲染區 -->
+      <div id="survey-question-container" class="min-h-[180px]">
+        <!-- 由 renderSurveyQuestion() 動態填入 -->
+      </div>
+
+    </div>
+  </div>
+
+  <script src="stimuli.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
