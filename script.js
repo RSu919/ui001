@@ -2,10 +2,10 @@
 // script.js - 實驗主邏輯
 // 實驗設計：2（錯誤方向）× 3（錯誤率）= 6 組 Between-subjects
 //   方向：One-way（只有 false_negative）vs Two-way（false_negative + false_positive）
-//   錯誤率：5%（每18題1錯）、10%（每18題2錯）、20%（每18題4錯）
-//   總題數：54 題（每階段 18 題）
+//   錯誤率：10%（每12題1錯）、20%（每12題2錯）、30%（每12題4錯）
+//   總題數：36 題（每階段 12 題）
 //   信心度：固定 90%
-//   量表：每 18 題填一次，共 3 次，每次 4 題
+//   量表：每 12 題填一次，共 3 次，每次 4 題
 // ============================================================
 
 // --- 1. Supabase 初始化 ---
@@ -15,12 +15,12 @@ const _supabase    = supabase.createClient(supabaseUrl, supabaseKey);
 
 // --- 2. 六組實驗條件定義 ---
 const EXPERIMENT_GROUPS = [
-  { id: 'OW_05', direction: 'One-way', errorRate: 0.05, errorsPerStage: 1 },
-  { id: 'OW_10', direction: 'One-way', errorRate: 0.10, errorsPerStage: 2 },
-  { id: 'OW_20', direction: 'One-way', errorRate: 0.20, errorsPerStage: 4 },
-  { id: 'TW_05', direction: 'Two-way', errorRate: 0.05, errorsPerStage: 1 },
-  { id: 'TW_10', direction: 'Two-way', errorRate: 0.10, errorsPerStage: 2 },
-  { id: 'TW_20', direction: 'Two-way', errorRate: 0.20, errorsPerStage: 4 },
+  { id: 'OW_10', direction: 'One-way', errorRate: 0.10, errorsPerStage: 1 },
+  { id: 'OW_20', direction: 'One-way', errorRate: 0.20, errorsPerStage: 2 },
+  { id: 'OW_30', direction: 'One-way', errorRate: 0.30, errorsPerStage: 4 },
+  { id: 'TW_10', direction: 'Two-way', errorRate: 0.10, errorsPerStage: 1 },
+  { id: 'TW_20', direction: 'Two-way', errorRate: 0.20, errorsPerStage: 2 },
+  { id: 'TW_30', direction: 'Two-way', errorRate: 0.30, errorsPerStage: 4 },
 ];
 
 // --- 3. 全域狀態 ---
@@ -50,48 +50,36 @@ function assignGroup() {
 }
 
 // --- 5. 決定每道題的 AI 標籤（核心邏輯） ---
-// 規則：
-//   - 階段一（stage 1）：所有標籤 100% 正確
-//   - 階段二（stage 2）：按錯誤率與方向注入錯誤
-//     * One-way：只有 false_negative（AI 被標成 Human）
-//     * Two-way：false_negative 與 false_positive 各一半（若奇數誤題，多出的給 false_negative）
-//   - 階段三（stage 3）：所有標籤 100% 恢復正確
 function buildTrials(groupConfig) {
   const stage1 = STIMULI_POOL.filter(t => t.stage === 1);
   const stage2 = STIMULI_POOL.filter(t => t.stage === 2);
   const stage3 = STIMULI_POOL.filter(t => t.stage === 3);
 
-  // 隨機打亂各階段（保持題數不變）
   const shuffle = arr => arr.sort(() => Math.random() - 0.5);
   const s1 = shuffle([...stage1]);
   const s2 = shuffle([...stage2]);
   const s3 = shuffle([...stage3]);
 
-  // 幫每道題標記最終的 ai_label（要顯示給受試者的標籤）
   function applyCorrectLabel(trials) {
     return trials.map(t => ({ ...t, ai_label: t.actual }));
   }
 
-  // 階段二：決定哪幾題出錯，以及如何出錯
   function applyStage2Errors(trials, groupConfig) {
     const { direction, errorsPerStage } = groupConfig;
     const result = trials.map(t => ({ ...t, ai_label: t.actual, is_error_trial: false }));
 
-    // 依方向分類可錯的候選題
-    const fnCandidates = result.filter(t => t.actual === 'AI');    // false_negative：AI→Human
-    const fpCandidates = result.filter(t => t.actual === 'Human'); // false_positive：Human→AI
+    const fnCandidates = result.filter(t => t.actual === 'AI');
+    const fpCandidates = result.filter(t => t.actual === 'Human');
 
     let fnCount, fpCount;
     if (direction === 'One-way') {
       fnCount = errorsPerStage;
       fpCount = 0;
     } else {
-      // Two-way：平均分配，奇數誤題時多給 false_negative
       fpCount = Math.floor(errorsPerStage / 2);
       fnCount = errorsPerStage - fpCount;
     }
 
-    // 從候選題中隨機選出要出錯的題目
     const pickRandom = (arr, n) => shuffle([...arr]).slice(0, n);
     const fnErrors = pickRandom(fnCandidates, Math.min(fnCount, fnCandidates.length));
     const fpErrors = pickRandom(fpCandidates, Math.min(fpCount, fpCandidates.length));
@@ -117,7 +105,7 @@ function buildTrials(groupConfig) {
 
 // --- 6. UI 渲染 ---
 function loadTrial() {
-  const TOTAL = 54;
+  const TOTAL = 36;
   if (state.currentTrial >= TOTAL) { showEndScreen(); return; }
 
   state.isProcessing = false;
@@ -141,7 +129,6 @@ function showAISuggestion() {
   const trial = state.trials[state.currentTrial];
   const box = document.getElementById('ai-suggestion-box');
 
-  // 固定信心度 90%
   const CONFIDENCE = 90;
   const isAI       = trial.ai_label === 'AI';
   const labelText  = isAI ? 'AI 生成' : '真人撰寫';
@@ -166,7 +153,6 @@ async function recordResponse(agreedWithAI, customLabel = null) {
   const endTime = Date.now();
   const trial   = state.trials[state.currentTrial];
 
-  // 決定使用者最終選擇
   let userFinalChoice;
   if (agreedWithAI) {
     userFinalChoice = trial.ai_label;
@@ -193,8 +179,8 @@ async function recordResponse(agreedWithAI, customLabel = null) {
     survey_data:    {},
   };
 
-  // 每 18 題觸發問卷（第 18、36、54 題）
-  if ((state.currentTrial + 1) % 18 === 0) {
+  // 每 12 題觸發問卷（第 12、24、36 題）
+  if ((state.currentTrial + 1) % 12 === 0) {
     showSurvey();
   } else {
     await saveData();
@@ -205,7 +191,6 @@ async function recordResponse(agreedWithAI, customLabel = null) {
 function showSurvey() {
   const overlay = document.getElementById('survey-layer');
   overlay.classList.remove('hidden');
-  // 重置進度條
   state.surveyScores = [];
   renderSurveyQuestion(0);
 }
@@ -239,7 +224,6 @@ function renderSurveyQuestion(index) {
 }
 
 function selectSurveyAnswer(index, value) {
-  // 視覺回饋
   [1,2,3,4,5,6,7].forEach(v => {
     const btn = document.getElementById(`sq-${v}`);
     if (btn) btn.classList.remove('bg-indigo-500', 'text-white', 'border-indigo-500');
@@ -247,7 +231,6 @@ function selectSurveyAnswer(index, value) {
   const chosen = document.getElementById(`sq-${value}`);
   if (chosen) chosen.classList.add('bg-indigo-500', 'text-white', 'border-indigo-500');
 
-  // 暫存後自動跳下一題（稍微延遲讓受試者看到選擇）
   setTimeout(() => {
     state.surveyScores[index] = value;
     if (index + 1 < SURVEY_QUESTIONS.length) {
@@ -268,7 +251,7 @@ async function submitSurvey() {
     trust_q3: scores[2],
     trust_q4: scores[3],
     trust_avg: parseFloat(avg.toFixed(3)),
-    phase:     Math.ceil((state.currentTrial + 1) / 18),
+    phase:     Math.ceil((state.currentTrial + 1) / 12),
   };
 
   document.getElementById('survey-layer').classList.add('hidden');
@@ -319,7 +302,6 @@ window.onload = () => {
   state.groupConfig = assignGroup();
   state.trials      = buildTrials(state.groupConfig);
 
-  // 顯示受試者資訊（不揭露組別條件）
   document.getElementById('group-display').innerText =
     `受試代號：${state.userId.toUpperCase()}`;
 
