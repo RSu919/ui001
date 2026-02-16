@@ -285,7 +285,8 @@ async function saveData() {
 
 // --- 10. 結束畫面 ---
 function showEndScreen() {
-  document.getElementById('experiment-container').innerHTML = `
+  const container = document.getElementById('experiment-page') || document.getElementById('main-container');
+  container.innerHTML = `
     <div class="text-center py-10">
       <h2 class="text-2xl font-bold text-green-600">🎉 實驗已完成，謝謝您的參與！</h2>
       <p class="mt-4 text-gray-600">
@@ -336,3 +337,4 @@ window.onload = () => {
     startExperiment();
   }
 };
+
