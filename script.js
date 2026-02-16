@@ -315,6 +315,15 @@ function showCustomOptions() {
 
 // --- 12. 實驗開始函數（由基本資料表單提交後觸發）---
 function startExperiment() {
+  // 強制檢查：沒有demographics就不能開始實驗
+  if (!state.demographics) {
+    console.error('Error: Demographics data not found. Showing demographics page.');
+    document.getElementById('experiment-page').classList.add('hidden');
+    document.getElementById('demographics-page').classList.remove('hidden');
+    document.getElementById('progress-section').classList.add('hidden');
+    return;
+  }
+
   state.groupConfig = assignGroup();
   state.trials      = buildTrials(state.groupConfig);
 
@@ -326,15 +335,17 @@ function startExperiment() {
 
 // --- 13. 頁面載入時檢查是否已填寫基本資料 ---
 window.onload = () => {
-  // 如果已經填過基本資料且實驗進行中，直接進入實驗頁面
   const hasDemographics = localStorage.getItem('demographics');
   const currentTrial = parseInt(localStorage.getItem('currentTrial')) || 0;
   
-  if (hasDemographics && currentTrial > 0) {
+  // 情況1：已填寫demographics（不管有沒有做過題目）→ 直接進入實驗
+  if (hasDemographics) {
     document.getElementById('demographics-page').classList.add('hidden');
     document.getElementById('experiment-page').classList.remove('hidden');
     document.getElementById('progress-section').classList.remove('hidden');
     startExperiment();
   }
+  // 情況2：沒有demographics → 停留在基本資料頁面（預設狀態，不需要額外處理）
 };
+
 
