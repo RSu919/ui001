@@ -249,14 +249,22 @@
       // 儲存到 localStorage
       localStorage.setItem('demographics', JSON.stringify(demographics));
       
+      // 更新 state.demographics（這很重要！）
+      if (typeof state !== 'undefined') {
+        state.demographics = demographics;
+      }
+      
       // 隱藏基本資料頁，顯示實驗頁
       document.getElementById('demographics-page').classList.add('hidden');
       document.getElementById('experiment-page').classList.remove('hidden');
       document.getElementById('progress-section').classList.remove('hidden');
       
-      // 初始化實驗（觸發 script.js 的實驗開始）
+      // 開始實驗
       if (typeof startExperiment === 'function') {
         startExperiment();
+      } else {
+        console.error('startExperiment function not found!');
+        alert('系統錯誤：無法啟動實驗，請重新整理頁面。');
       }
     });
   </script>
