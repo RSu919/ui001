@@ -33,9 +33,18 @@ let state = {
   isProcessing: false,
   tempData:     null,
   surveyScores: [],     // 暫存問卷四題的答案
+  demographics: null,   // 基本資料（從localStorage讀取）
 };
 
 localStorage.setItem('userId', state.userId);
+
+// 讀取基本資料
+try {
+  const demo = localStorage.getItem('demographics');
+  if (demo) state.demographics = JSON.parse(demo);
+} catch (e) {
+  console.error('Failed to parse demographics:', e);
+}
 
 // --- 4. 分組邏輯（隨機平均分配） ---
 function assignGroup() {
@@ -177,6 +186,12 @@ async function recordResponse(agreedWithAI, customLabel = null) {
     is_correct:     userFinalChoice === trial.actual,
     response_time:  endTime - state.startTime,
     survey_data:    {},
+    // 基本資料（只在第一題時寫入，後續為null避免重複）
+    gender:         state.currentTrial === 0 && state.demographics ? state.demographics.gender : null,
+    age:            state.currentTrial === 0 && state.demographics ? state.demographics.age : null,
+    education:      state.currentTrial === 0 && state.demographics ? state.demographics.education : null,
+    occupation:     state.currentTrial === 0 && state.demographics ? state.demographics.occupation : null,
+    ai_experience:  state.currentTrial === 0 && state.demographics ? state.demographics.ai_experience : null,
   };
 
   // 每 12 題觸發問卷（第 12、24、36 題）
@@ -297,8 +312,8 @@ function showCustomOptions() {
   document.getElementById('custom-options').classList.remove('hidden');
 }
 
-// --- 12. 頁面初始化 ---
-window.onload = () => {
+// --- 12. 實驗開始函數（由基本資料表單提交後觸發）---
+function startExperiment() {
   state.groupConfig = assignGroup();
   state.trials      = buildTrials(state.groupConfig);
 
@@ -306,4 +321,18 @@ window.onload = () => {
     `受試代號：${state.userId.toUpperCase()}`;
 
   loadTrial();
+}
+
+// --- 13. 頁面載入時檢查是否已填寫基本資料 ---
+window.onload = () => {
+  // 如果已經填過基本資料且實驗進行中，直接進入實驗頁面
+  const hasDemographics = localStorage.getItem('demographics');
+  const currentTrial = parseInt(localStorage.getItem('currentTrial')) || 0;
+  
+  if (hasDemographics && currentTrial > 0) {
+    document.getElementById('demographics-page').classList.add('hidden');
+    document.getElementById('experiment-page').classList.remove('hidden');
+    document.getElementById('progress-section').classList.remove('hidden');
+    startExperiment();
+  }
 };

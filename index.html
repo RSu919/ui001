@@ -10,7 +10,7 @@
 <body class="bg-gray-50 min-h-screen flex flex-col items-center py-10">
 
   <!-- 進度列 -->
-  <div class="w-full max-w-2xl px-4 mb-8">
+  <div id="progress-section" class="w-full max-w-2xl px-4 mb-8 hidden">
     <div class="flex justify-between text-sm mb-1 text-gray-600">
       <span id="group-display">受試代號：載入中...</span>
       <span id="progress-text">進度：0 / 36</span>
@@ -20,43 +20,196 @@
     </div>
   </div>
 
-  <!-- 主要實驗區塊 -->
-  <main id="experiment-container" class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-md">
+  <!-- 主要容器 -->
+  <main id="main-container" class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-md">
 
-    <!-- 評論內容 -->
-    <div id="stimulus-content" class="text-lg leading-relaxed mb-8 min-h-[150px] text-gray-800">
-      正在初始化實驗...
+    <!-- ========== 基本資料收集頁面 ========== -->
+    <div id="demographics-page">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">歡迎參與 AI 偵測信任度研究</h1>
+      <p class="text-gray-600 mb-6">在開始實驗前，請先填寫以下基本資料（約1分鐘）。您的所有資料將完全匿名處理。</p>
+
+      <form id="demographics-form" class="space-y-5">
+        
+        <!-- 性別 -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">1. 性別</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="radio" name="gender" value="male" required class="mr-2">
+              <span>男性</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="gender" value="female" class="mr-2">
+              <span>女性</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="gender" value="other" class="mr-2">
+              <span>其他</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="gender" value="prefer_not_to_say" class="mr-2">
+              <span>不願透露</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 年齡 -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">2. 年齡</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="radio" name="age" value="18-24" required class="mr-2">
+              <span>18-24 歲</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="age" value="25-34" class="mr-2">
+              <span>25-34 歲</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="age" value="35-44" class="mr-2">
+              <span>35-44 歲</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="age" value="45-54" class="mr-2">
+              <span>45-54 歲</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="age" value="55+" class="mr-2">
+              <span>55 歲以上</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 教育程度 -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">3. 教育程度</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="radio" name="education" value="high_school_below" required class="mr-2">
+              <span>高中職以下</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="education" value="bachelor" class="mr-2">
+              <span>大學</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="education" value="master" class="mr-2">
+              <span>碩士</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="education" value="phd" class="mr-2">
+              <span>博士</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 職業 -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">4. 職業</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="radio" name="occupation" value="student" required class="mr-2">
+              <span>學生</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="occupation" value="full_time" class="mr-2">
+              <span>全職工作</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="occupation" value="part_time" class="mr-2">
+              <span>兼職工作</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="occupation" value="freelance" class="mr-2">
+              <span>自由業</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="occupation" value="unemployed" class="mr-2">
+              <span>待業中</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="occupation" value="other" class="mr-2">
+              <span>其他</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- AI使用經驗 -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">5. 請問您使用 AI 工具（如 ChatGPT、Gemini、Copilot 等）的頻率？</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="radio" name="ai_experience" value="never" required class="mr-2">
+              <span>從未使用</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="ai_experience" value="rarely" class="mr-2">
+              <span>很少使用（一個月少於1次）</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="ai_experience" value="sometimes" class="mr-2">
+              <span>偶爾使用（一個月1-3次）</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="ai_experience" value="often" class="mr-2">
+              <span>經常使用（一週1-3次）</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="ai_experience" value="very_often" class="mr-2">
+              <span>非常頻繁（幾乎每天）</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 提交按鈕 -->
+        <div class="pt-4">
+          <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-medium">
+            開始實驗
+          </button>
+        </div>
+
+      </form>
     </div>
 
-    <hr class="my-6">
+    <!-- ========== 實驗頁面（初始隱藏）========== -->
+    <div id="experiment-page" class="hidden">
 
-    <!-- AI 建議標籤 -->
-    <div id="ai-suggestion-box" class="hidden bg-gray-50 p-6 rounded-lg text-center">
-      <p class="text-sm text-gray-400 mb-2">系統偵測中...</p>
-    </div>
+      <!-- 評論內容 -->
+      <div id="stimulus-content" class="text-lg leading-relaxed mb-8 min-h-[150px] text-gray-800">
+        正在初始化實驗...
+      </div>
 
-    <!-- 操作按鈕 -->
-    <div id="action-buttons" class="hidden mt-8 grid grid-cols-2 gap-4">
-      <button onclick="recordResponse(true)"
-        class="py-3 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
-        採納助理建議
-      </button>
-      <button onclick="showCustomOptions()"
-        class="py-3 px-6 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-        我想自行判斷
-      </button>
-    </div>
+      <hr class="my-6">
 
-    <!-- 自行判斷選項 -->
-    <div id="custom-options" class="hidden mt-4 flex gap-3 justify-center">
-      <button onclick="recordResponse(false, 'human')"
-        class="text-sm py-2 px-5 bg-green-100 text-green-700 rounded-lg border border-green-200 hover:bg-green-200 transition">
-        ✅ 我認為是：真人撰寫
-      </button>
-      <button onclick="recordResponse(false, 'ai')"
-        class="text-sm py-2 px-5 bg-red-100 text-red-700 rounded-lg border border-red-200 hover:bg-red-200 transition">
-        🤖 我認為是：AI 生成
-      </button>
+      <!-- AI 建議標籤 -->
+      <div id="ai-suggestion-box" class="hidden bg-gray-50 p-6 rounded-lg text-center">
+        <p class="text-sm text-gray-400 mb-2">系統偵測中...</p>
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div id="action-buttons" class="hidden mt-8 grid grid-cols-2 gap-4">
+        <button onclick="recordResponse(true)"
+          class="py-3 px-6 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+          採納助理建議
+        </button>
+        <button onclick="showCustomOptions()"
+          class="py-3 px-6 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+          我想自行判斷
+        </button>
+      </div>
+
+      <!-- 自行判斷選項 -->
+      <div id="custom-options" class="hidden mt-4 flex gap-3 justify-center">
+        <button onclick="recordResponse(false, 'human')"
+          class="text-sm py-2 px-5 bg-green-100 text-green-700 rounded-lg border border-green-200 hover:bg-green-200 transition">
+          ✅ 我認為是：真人撰寫
+        </button>
+        <button onclick="recordResponse(false, 'ai')"
+          class="text-sm py-2 px-5 bg-red-100 text-red-700 rounded-lg border border-red-200 hover:bg-red-200 transition">
+          🤖 我認為是：AI 生成
+        </button>
+      </div>
+
     </div>
 
   </main>
@@ -78,6 +231,35 @@
 
   <script src="stimuli.js"></script>
   <script src="script.js"></script>
+  <script>
+    // 基本資料表單提交處理
+    document.getElementById('demographics-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // 收集表單資料
+      const formData = new FormData(e.target);
+      const demographics = {
+        gender: formData.get('gender'),
+        age: formData.get('age'),
+        education: formData.get('education'),
+        occupation: formData.get('occupation'),
+        ai_experience: formData.get('ai_experience')
+      };
+      
+      // 儲存到 localStorage
+      localStorage.setItem('demographics', JSON.stringify(demographics));
+      
+      // 隱藏基本資料頁，顯示實驗頁
+      document.getElementById('demographics-page').classList.add('hidden');
+      document.getElementById('experiment-page').classList.remove('hidden');
+      document.getElementById('progress-section').classList.remove('hidden');
+      
+      // 初始化實驗（觸發 script.js 的實驗開始）
+      if (typeof startExperiment === 'function') {
+        startExperiment();
+      }
+    });
+  </script>
 </body>
 </html>
 
