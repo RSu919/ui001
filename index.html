@@ -57,12 +57,74 @@
         </div>
 
         <div class="bg-gray-50 rounded-xl p-4">
-          <p class="font-semibold text-gray-700 mb-2">✅ 您的任務</p>
-          <ul class="text-sm text-gray-700 space-y-1.5">
-            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">1.</span>閱讀每篇評論內容。</li>
-            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">2.</span>參考 AI 系統的建議後，決定要<strong>採納建議</strong>，還是<strong>自行做出不同判斷</strong>。</li>
-            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">3.</span>每完成一段後，填寫一份簡短問卷（約 1 分鐘）。</li>
-          </ul>
+          <p class="font-semibold text-gray-700 mb-3">✅ 整體流程說明（共三個階段，每階段 12 篇評論）</p>
+
+          <!-- 流程時間軸 -->
+          <div class="flex items-center justify-between mb-4 px-2">
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">1</div>
+              <span class="text-xs text-indigo-600 font-medium mt-1">第一階段</span>
+              <span class="text-xs text-gray-400">12 篇</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-indigo-200 mx-1"></div>
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-bold">📋</div>
+              <span class="text-xs text-gray-500 font-medium mt-1">問卷</span>
+              <span class="text-xs text-gray-400">4–6 題</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-indigo-200 mx-1"></div>
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">2</div>
+              <span class="text-xs text-indigo-600 font-medium mt-1">第二階段</span>
+              <span class="text-xs text-gray-400">12 篇</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-indigo-200 mx-1"></div>
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-bold">📋</div>
+              <span class="text-xs text-gray-500 font-medium mt-1">問卷</span>
+              <span class="text-xs text-gray-400">4–6 題</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-indigo-200 mx-1"></div>
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">3</div>
+              <span class="text-xs text-indigo-600 font-medium mt-1">第三階段</span>
+              <span class="text-xs text-gray-400">12 篇</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-indigo-200 mx-1"></div>
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-gray-300 text-white flex items-center justify-center text-sm font-bold">📋</div>
+              <span class="text-xs text-gray-500 font-medium mt-1">問卷</span>
+              <span class="text-xs text-gray-400">4–6 題</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-green-300 mx-1"></div>
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">✓</div>
+              <span class="text-xs text-green-600 font-medium mt-1">完成</span>
+            </div>
+          </div>
+
+          <!-- 每題操作說明 -->
+          <div class="bg-white rounded-lg border border-gray-200 p-3 mt-2">
+            <p class="text-xs font-semibold text-gray-600 mb-2">每篇評論的操作方式：</p>
+            <div class="space-y-1.5 text-xs text-gray-600">
+              <div class="flex items-start gap-2">
+                <span class="text-indigo-500 font-bold mt-0.5">①</span>
+                <span>閱讀畫面上出現的餐廳評論</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-indigo-500 font-bold mt-0.5">②</span>
+                <span>查看 AI 系統給出的判斷建議（真人撰寫 / AI 生成）</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-indigo-500 font-bold mt-0.5">③</span>
+                <span>點擊按鈕：<strong>「採納助理建議」</strong> 或 <strong>「我想自行判斷」</strong>，完成這一篇</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-indigo-500 font-bold mt-0.5">④</span>
+                <span>重複以上步驟，完成 12 篇後會自動出現問卷</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="bg-amber-50 rounded-xl p-4">
@@ -358,6 +420,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
