@@ -23,8 +23,84 @@
   <!-- 主要容器 -->
   <main id="main-container" class="w-full max-w-2xl bg-white p-8 rounded-xl shadow-md">
 
+    <!-- ========== 指導語頁面（第一頁）========== -->
+    <div id="instruction-page">
+
+      <!-- 標題 -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-100 rounded-full mb-3">
+          <span class="text-2xl">🔍</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-800">歡迎參與本次研究</h1>
+        <p class="text-sm text-gray-500 mt-1">預計花費時間：約 10–15 分鐘</p>
+      </div>
+
+      <!-- 研究說明區塊 -->
+      <div class="space-y-4 mb-6">
+
+        <div class="bg-blue-50 rounded-xl p-4">
+          <p class="font-semibold text-blue-800 mb-1">📋 這個研究在做什麼？</p>
+          <p class="text-sm text-gray-700">
+            這是一項關於「人們如何使用 AI 輔助工具」的學術研究。
+            您將閱讀一系列餐廳評論，並搭配一套 AI 偵測系統的建議來判斷每篇評論是由
+            <strong>真人撰寫</strong>還是<strong>AI 生成</strong>的。
+          </p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="font-semibold text-gray-700 mb-2">🤖 關於這套 AI 偵測系統</p>
+          <ul class="text-sm text-gray-700 space-y-1.5">
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">•</span>系統會自動分析每篇評論，給出「真人撰寫」或「AI 生成」的判斷建議。</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">•</span>系統同時會顯示它的<strong>信心度</strong>（例如 90%）。</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">•</span>這套系統的整體準確率約為 <strong>90%</strong>，也就是說偶爾會出現判斷錯誤的情況。</li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="font-semibold text-gray-700 mb-2">✅ 您的任務</p>
+          <ul class="text-sm text-gray-700 space-y-1.5">
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">1.</span>閱讀每篇評論內容。</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">2.</span>參考 AI 系統的建議後，決定要<strong>採納建議</strong>，還是<strong>自行做出不同判斷</strong>。</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-indigo-500">3.</span>每完成一段後，填寫一份簡短問卷（約 1 分鐘）。</li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50 rounded-xl p-4">
+          <p class="font-semibold text-amber-800 mb-1">📌 注意事項</p>
+          <ul class="text-sm text-gray-700 space-y-1.5">
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-amber-500">•</span>本研究沒有標準答案，請依照您<strong>真實的感受與判斷</strong>作答。</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-amber-500">•</span>所有資料將完全匿名處理，僅用於學術研究。</li>
+            <li class="flex items-start gap-2"><span class="mt-0.5 text-amber-500">•</span>您可以隨時退出，不會有任何影響。</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- 知情同意 -->
+      <div class="border border-gray-200 rounded-xl p-4 mb-6">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="consent-checkbox" class="mt-1 w-4 h-4 accent-indigo-600">
+          <span class="text-sm text-gray-700">
+            我已閱讀並了解上述說明，自願參與本研究，並同意我的匿名回答資料用於學術研究用途。
+          </span>
+        </label>
+      </div>
+
+      <!-- 下一步按鈕 -->
+      <button
+        id="start-btn"
+        onclick="goToDemographics()"
+        disabled
+        class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium
+               disabled:opacity-40 disabled:cursor-not-allowed
+               hover:bg-indigo-700 transition">
+        我已了解，開始填寫基本資料 →
+      </button>
+
+    </div>
+
     <!-- ========== 基本資料收集頁面 ========== -->
-    <div id="demographics-page">
+    <div id="demographics-page" class="hidden">
       <h1 class="text-2xl font-bold text-gray-800 mb-2">歡迎參與 AI 偵測信任度研究</h1>
       <p class="text-gray-600 mb-6">在開始實驗前，請先填寫以下基本資料（約1分鐘）。您的所有資料將完全匿名處理。</p>
 
@@ -232,6 +308,18 @@
   <script src="stimuli.js"></script>
   <script src="script.js"></script>
   <script>
+    // ── 指導語頁邏輯 ──────────────────────────────────────────
+    // checkbox 勾選後才啟用「開始」按鈕
+    document.getElementById('consent-checkbox').addEventListener('change', function() {
+      document.getElementById('start-btn').disabled = !this.checked;
+    });
+
+    // 從指導語頁進入基本資料頁
+    function goToDemographics() {
+      document.getElementById('instruction-page').classList.add('hidden');
+      document.getElementById('demographics-page').classList.remove('hidden');
+    }
+
     // 基本資料表單提交處理
     document.getElementById('demographics-form').addEventListener('submit', function(e) {
       e.preventDefault();
