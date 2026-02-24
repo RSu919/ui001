@@ -263,12 +263,8 @@ function showStageFeedback() {
   let feedbackHTML = '';
 
   if (phaseNumber === 1 || phaseNumber === 3) {
-    // 階段一和三：AI 完全正確，無錯誤
+    // 階段一和三：AI 完全正確，無錯誤（不顯示正確題數，避免受試者計算準確率）
     feedbackHTML = `
-      <div class="flex items-center gap-2 text-green-700 bg-green-50 rounded-lg px-4 py-3 mb-2">
-        <span class="text-xl">✅</span>
-        <span class="font-medium">正確判斷：${totalTrials} 題</span>
-      </div>
       <div class="flex items-center gap-2 text-gray-400 bg-gray-50 rounded-lg px-4 py-3 mb-2">
         <span class="text-xl">—</span>
         <span>AI 內容被誤判為真人：0 題</span>
@@ -305,10 +301,6 @@ function showStageFeedback() {
          </div>`;
 
     feedbackHTML = `
-      <div class="flex items-center gap-2 text-green-700 bg-green-50 rounded-lg px-4 py-3 mb-2">
-        <span class="text-xl">✅</span>
-        <span class="font-medium">正確判斷：${correctCount} 題</span>
-      </div>
       ${fnRow}
       ${fpRow}
     `;
